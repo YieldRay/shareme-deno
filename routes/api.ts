@@ -31,7 +31,16 @@ router.use("/:namespace", async (ctx, next) => {
 
 router.get("/:namespace", async (ctx, next) => {
     if (ctx.request.headers.get("user-agent")?.startsWith("curl")) {
-        const content = await db.get(ctx.state.namespace);
+        const namespace = ctx.params.namespace;
+        if (!namespace) {
+            ctx.response.status = 400;
+            ctx.response.body = `[ShareMe]: namespace cannot be empty`;
+        }
+        if (!isNamespaceValid(namespace)) {
+            ctx.response.status = 400;
+            ctx.response.body = `[ShareMe]: Namespace is invalid, is can only contains letters and numbers`;
+        }
+        const content = await db.get(namespace);
         ctx.response.body = content;
         return;
     } else {
@@ -44,15 +53,23 @@ router.post("/:namespace", async (ctx) => {
 
     let body: ReturnType<typeof ctx.request.body>;
     let content = "";
-    let isBadRequest = false;
+
+    /**
+     * No required body is matched, respond with content
+     *
+     * This is used for getting what the namespace contains rather than write it
+     *
+     * ! after calling this method, a `return` statement should follow !
+     */
+    async function respondWithContent() {
+        const content = await db.get(namespace);
+        ctx.response.body = content;
+    }
 
     try {
         body = ctx.request.body();
     } catch {
-        //! No required body is matched, respond with content
-        //? This is used for getting what the namespace contains rather than write it
-        const content = await db.get(namespace);
-        ctx.response.body = content;
+        await respondWithContent();
         return;
     }
 
@@ -60,24 +77,26 @@ router.post("/:namespace", async (ctx) => {
         case "form": {
             const form = await body.value;
             if (form.has("t")) content = form.get("t") as string;
-            else isBadRequest = true;
+            else {
+                await respondWithContent();
+                return;
+            }
             break;
         }
         case "json": {
             const json = await body.value;
             if (typeof json.t === "string") content = json.t;
-            else isBadRequest = true;
+            else {
+                await respondWithContent();
+                return;
+            }
             break;
         }
         default: {
-            isBadRequest = true;
+            ctx.response.status = 400;
+            ctx.response.body = `[ShareMe]: Bad request`;
+            return;
         }
-    }
-
-    if (isBadRequest) {
-        ctx.response.status = 400;
-        ctx.response.body = `[ShareMe]: Bad request`;
-        return;
     }
 
     const ok = await db.set(namespace, content);

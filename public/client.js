@@ -1,17 +1,17 @@
-const version = "0.4.0";
 class ShareMe {
+    static VERSION = "0.4.1";
     constructor(server) {
         this.server = server;
     }
     async get(namespace) {
-        // => string/null
+        // => string|null
         if (!isNamespaceValid(namespace)) throw new Error("Invalid namespace");
         try {
-            typeCheck(namespace, "string");
             const url = new URL(this.server);
             url.pathname = `/${namespace}`;
             const resp = await fetch(url.toString(), {
-                method: "POST", // use POST with no body to get data
+                method: "POST",
+                // use POST with no body to get data
             });
             if (!resp.ok) return null;
             return await resp.text();
@@ -21,11 +21,9 @@ class ShareMe {
     }
 
     async set(namespace, t) {
-        // => true/false
+        // => boolean
         if (!isNamespaceValid(namespace)) throw new Error("Invalid namespace");
         try {
-            typeCheck(namespace, "string");
-            typeCheck(t, "string");
             const url = new URL(this.server);
             url.pathname = `/${namespace}`;
             const resp = await fetch(url.toString(), {
@@ -47,8 +45,4 @@ function isNamespaceValid(namespace) {
     return /^[a-zA-Z0-9]{1,16}$/.test(namespace);
 }
 
-function typeCheck(data, type) {
-    if (typeof data !== type) throw new TypeError(`data must be ${type}`);
-}
-
-export { ShareMe, version };
+export { ShareMe, isNamespaceValid };

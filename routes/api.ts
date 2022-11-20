@@ -29,8 +29,17 @@ router.use("/:namespace", async (ctx, next) => {
     }
 });
 
+function notBrowser(ua: string | null): boolean {
+    if (typeof ua != "string") return true;
+    if (ua.startsWith("curl")) return true;
+    if (ua.startsWith("Mozilla")) return false;
+    if (ua.length <= 10) return true;
+    return false;
+}
+
+//! For command line
 router.get("/:namespace", async (ctx, next) => {
-    if (ctx.request.headers.get("user-agent")?.startsWith("curl")) {
+    if (notBrowser(ctx.request.headers.get("user-agent"))) {
         const namespace = ctx.params.namespace;
         if (!namespace) {
             ctx.response.status = 400;

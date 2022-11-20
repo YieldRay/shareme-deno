@@ -38,6 +38,19 @@ function notBrowser(ua: string | null): boolean {
 }
 
 //! For command line
+router.get("/", async (ctx, next) => {
+    if (!notBrowser(ctx.request.headers.get("user-agent"))) {
+        await next();
+        return;
+    }
+
+    ctx.response.body = `Usage:
+(replace ':namespace' with a namespace you want)
+
+$ curl ${ctx.request.url.origin}/:namespace                                             
+$ curl ${ctx.request.url.origin}/:namespace -d t=any_thing_you_want_to_store`;
+});
+
 router.get("/:namespace", async (ctx, next) => {
     if (notBrowser(ctx.request.headers.get("user-agent"))) {
         const namespace = ctx.params.namespace;
@@ -47,7 +60,7 @@ router.get("/:namespace", async (ctx, next) => {
         }
         if (!isNamespaceValid(namespace)) {
             ctx.response.status = 400;
-            ctx.response.body = `[ShareMe]: Namespace is invalid, is can only contains letters and numbers`;
+            ctx.response.body = `[ShareMe]: Namespace is invalid, it can only contains letters and numbers`;
         }
         const content = await db.get(namespace);
         ctx.response.body = content;

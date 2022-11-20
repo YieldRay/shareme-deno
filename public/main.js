@@ -30,7 +30,7 @@ console.log(
 Usage for command line  (replace \`:namespace\` with a namespace you want)  
         
 $ curl ${location.origin}/:namespace                                              
-$ curl -d t=any_thing_you_want_to_store ${location.origin}/:namespace
+$ curl ${location.origin}/:namespace -d t=any_thing_you_want_to_store
 
 `,
     "color: #66ccff; font-size: 16px; padding: 2px;"

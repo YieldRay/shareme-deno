@@ -66,6 +66,14 @@ main > textarea:focus {
     outline: none;
 }
 
+textarea {
+    transition: background-color 0.5s;
+}
+
+textarea[disabled] {
+    cursor: disabled;
+}
+
 ::-webkit-scrollbar {
     width: 1rem;
 }

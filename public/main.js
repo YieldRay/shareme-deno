@@ -36,10 +36,9 @@ $ curl ${location.origin}/:namespace -d t=any_thing_you_want_to_store
     "color: #66ccff; font-size: 16px; padding: 2px;"
 );
 
+// Forbid invalid namespace
 const namespace = window.location.pathname.slice(1);
-if (!isNamespaceValid(namespace)) {
-    location.pathname = generateRandomString();
-}
+if (!isNamespaceValid(namespace)) location.pathname = generateRandomString();
 
 function generateRandomString(length = 4) {
     const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -49,12 +48,15 @@ function generateRandomString(length = 4) {
 }
 
 async function updateFromServer($textarea, $info) {
+    $textarea.disabled = true;
     const data = await app.get(namespace);
+    $textarea.disabled = false;
     if (data === null) {
         $info.className = "red";
     } else {
         $info.className = "green";
         $textarea.value = data;
+        $textarea.focus();
     }
     $info.innerText = "Updated at: " + new Date().toLocaleString();
 }

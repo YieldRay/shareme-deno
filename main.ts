@@ -2,12 +2,12 @@ import { Application } from 'oak';
 import { type DB } from './db/db.ts';
 import { mongodb } from './db/mongo.ts';
 import { tmp } from './db/tmp.ts';
-import 'https://deno.land/x/dotenv@v3.2.0/load.ts';
+import 'https://deno.land/x/dotenv@v3.2.2/load.ts';
 
 //? Config database
-const MONGO_SRV = Deno.env.get('MONGO_DB_URI') ?? '';
-const MONGO_DB = Deno.env.get('MONGO_DB_NAME') ?? '';
-const MONGO_COLL = Deno.env.get('MONGO_DB_COLLECTION') ?? '';
+const MONGO_SRV = Deno.env.get('MONGODB_URI') ?? '';
+const MONGO_DB = Deno.env.get('MONGODB_NAME') ?? '';
+const MONGO_COLL = Deno.env.get('MONGODB_COLLECTION') ?? '';
 let db: DB;
 if (MONGO_SRV && MONGO_DB && MONGO_COLL) {
 	console.log('Using MongoDB');

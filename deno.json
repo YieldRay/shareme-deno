@@ -1,8 +1,8 @@
 {
 	"imports": {
-		"std/": "https://deno.land/std@0.181.0/",
+		"std/": "https://deno.land/std@0.188.0/",
 		"mongo": "https://deno.land/x/mongo@v0.31.2/mod.ts",
-		"oak": "https://deno.land/x/oak@v12.1.0/mod.ts"
+		"oak": "https://deno.land/x/oak@v12.5.0/mod.ts"
 	},
 	"tasks": {
 		"dev": "deno run --watch main.ts",

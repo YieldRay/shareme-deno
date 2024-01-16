@@ -30,7 +30,7 @@ router.use("/:namespace", async (ctx, next) => {
 });
 
 function notBrowser(ua: string | null): boolean {
-    if (typeof ua != "string") return true;
+    if (typeof ua !== "string") return true;
     if (ua.startsWith("curl")) return true;
     if (ua.startsWith("Mozilla")) return false;
     if (ua.length <= 10) return true;
@@ -43,28 +43,34 @@ router.get("/", async (ctx, next) => {
         return;
     }
 
-    //! for command line
-    ctx.response.body = `Usage:
+    {
+        //! for command line
+        const url = `${ctx.request.url.origin}/:namespace`;
+        ctx.response.body = `Usage:
 (replace ':namespace' with a namespace you want)
 
-$ curl ${ctx.request.url.origin}/:namespace                                             
-$ curl ${ctx.request.url.origin}/:namespace -d t=any_thing_you_want_to_store\n`;
+$ curl ${url}                                             
+$ curl ${url} -d t=any_thing_you_want_to_store
+$ echo "any_thing_you_want_to_store" | curl ${url} -H content-type:text/plain -d @-
+`;
+        //! end
+    }
 });
 
 router.get("/:namespace", async (ctx, next) => {
-	//! for command line
-	if (notBrowser(ctx.request.headers.get("user-agent"))) {
-		const namespace = ctx.params.namespace;
+    //! for command line
+    if (notBrowser(ctx.request.headers.get("user-agent"))) {
+        const namespace = ctx.params.namespace;
         if (!namespace) {
-			ctx.response.status = 400;
+            ctx.response.status = 400;
             ctx.response.body = `[ShareMe]: namespace cannot be empty\n`;
         }
         if (!isNamespaceValid(namespace)) {
-			ctx.response.status = 400;
+            ctx.response.status = 400;
             ctx.response.body = `[ShareMe]: namespace is invalid, it can only contain letters and numbers\n`;
         }
         const content = await db.get(namespace);
-		//! add "\n" for command line
+        //! add "\n" for command line
         ctx.response.body = content + "\n";
         return;
     } else {
@@ -74,9 +80,6 @@ router.get("/:namespace", async (ctx, next) => {
 
 router.post("/:namespace", async (ctx) => {
     const { namespace } = ctx.state;
-
-    let body: ReturnType<typeof ctx.request.body>;
-    let content = "";
 
     /**
      * No required body is matched, respond with content
@@ -88,33 +91,40 @@ router.post("/:namespace", async (ctx) => {
     async function respondWithContent() {
         const content = await db.get(namespace);
         ctx.response.body = content;
-		//! this do not add "\n"
+        //! this do not add "\n"
     }
+
+    let body: ReturnType<typeof ctx.request.body>;
+    let content = "";
 
     try {
         body = ctx.request.body();
     } catch {
-        await respondWithContent();
-        return;
+        return await respondWithContent();
     }
 
+    // console.log(body.type);
     switch (body.type) {
         case "form": {
-            const form = await body.value;
-            if (form.has("t")) content = form.get("t")!;
-            else {
-                await respondWithContent();
-                return;
+            const sp = await body.value;
+            if (sp.has("t")) {
+                content = sp.get("t")!;
+            } else {
+                return await respondWithContent();
             }
             break;
         }
         case "json": {
             const json = await body.value;
-            if (typeof json.t === "string") content = json.t;
-            else {
-                await respondWithContent();
-                return;
+            if (typeof json.t === "string") {
+                content = json.t;
+            } else {
+                return await respondWithContent();
             }
+            break;
+        }
+        case "text": {
+            content = await body.value;
             break;
         }
         default: {

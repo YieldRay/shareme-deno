@@ -1,26 +1,13 @@
 {
-	"imports": {
-		"std/": "https://deno.land/std@0.188.0/",
-		"mongo": "https://deno.land/x/mongo@v0.31.2/mod.ts",
-		"oak": "https://deno.land/x/oak@v12.5.0/mod.ts"
-	},
-	"tasks": {
-		"dev": "deno run --watch main.ts",
-		"start": "deno run -A main.ts",
-		"vendor": "deno vendor main.ts"
-	},
-	"fmt": {
-		"files": {
-			"include": ["src/"],
-			"exclude": ["node_modules/"]
-		},
-		"options": {
-			"useTabs": true,
-			"lineWidth": 80,
-			"indentWidth": 4,
-			"singleQuote": true,
-			"proseWrap": "preserve"
-		}
-	},
-	"importMap": "deno.json"
+    "imports": {
+        "std/": "https://deno.land/std@0.212.0/",
+        "mongodb": "npm:mongodb",
+        "oak": "https://deno.land/x/oak@v12.6.2/mod.ts"
+    },
+    "tasks": {
+        "dev": "deno run -A --watch main.ts",
+        "start": "deno run -A main.ts",
+        "vendor": "deno vendor main.ts"
+    },
+    "importMap": "deno.json"
 }

@@ -24,14 +24,15 @@ console.log(
     "color:#1AFF00",
     "color:#00FF2E"
 );
+const url = `${location.origin}/:namespace`;
 console.log(
     `%c
 
 Usage for command line  (replace \`:namespace\` with a namespace you want)  
         
-$ curl ${location.origin}/:namespace                                              
-$ curl ${location.origin}/:namespace -d t=any_thing_you_want_to_store
-
+$ curl ${url}                                              
+$ curl ${url} -d t=any_thing_you_want_to_store
+$ echo "any_thing_you_want_to_store" | curl ${url} -H content-type:text/plain -d @-
 `,
     "color: #66ccff; font-size: 16px; padding: 2px;"
 );

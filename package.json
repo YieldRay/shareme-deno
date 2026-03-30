@@ -1,0 +1,16 @@
+{
+  "name": "shareme",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "bun --watch main.ts",
+    "start": "bun run main.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "hono": "^4.12.9",
+    "mongodb": "^6.21.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

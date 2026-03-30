@@ -1,47 +1,43 @@
-import { Application } from "oak";
+import process from "node:process";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { type DB } from "./db/db.ts";
 import { mongodb } from "./db/mongo.ts";
 import { tmp } from "./db/tmp.ts";
-import "https://deno.land/x/dotenv@v3.2.2/load.ts";
+import { createApiRoutes } from "./routes/api.ts";
+import { createStaticRoutes } from "./routes/static.ts";
 
-//? Config database
-const MONGODB_URI = Deno.env.get("MONGODB_URI") ?? "";
-const MONGO_DB = Deno.env.get("MONGODB_NAME") ?? "";
-const MONGO_COLL = Deno.env.get("MONGODB_COLLECTION") ?? "";
+const MONGODB_URI = process.env.MONGODB_URI ?? "";
+const MONGO_DB = process.env.MONGODB_NAME ?? "";
+const MONGO_COLL = process.env.MONGODB_COLLECTION ?? "";
+
 let db: DB;
 if (MONGODB_URI && MONGO_DB && MONGO_COLL) {
-    console.log("Using MongoDB");
-    db = await mongodb(MONGODB_URI, MONGO_DB, MONGO_COLL);
+  console.log("Using MongoDB");
+  db = await mongodb(MONGODB_URI, MONGO_DB, MONGO_COLL);
 } else {
-    console.log("Using TMP Cache");
-    db = await tmp();
+  console.log("Using TMP Cache");
+  db = await tmp();
 }
-export { db };
 
-//? Start HTTP server
-const app = new Application();
+const app = new Hono();
 
-app.use(async (ctx, next) => {
-    // Enable CORS
-    if (ctx.request.headers.has("origin")) {
-        ctx.response.headers.set("access-control-allow-origin", ctx.request.headers.get("origin")!);
-        ctx.response.headers.set("access-control-allow-methods", "*");
-        ctx.response.headers.set("access-control-allow-headers", "*");
-    }
-    if (ctx.request.method === "OPTIONS") {
-        ctx.response.status = 200;
-        ctx.response.body = null;
-        return;
-    }
-    await next();
-});
+app.use(
+  "*",
+  cors({
+    origin: (origin) => origin,
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+    allowHeaders: ["*"],
+  }),
+);
 
-import apiRouter from "./routes/api.ts";
-app.use(apiRouter.routes());
+app.route("/", createApiRoutes(db));
+app.route("/", createStaticRoutes());
 
-import staticRouter from "./routes/static.ts";
-app.use(staticRouter.routes());
+const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
+console.log(`Server listening at http://localhost:${PORT}`);
 
-const PORT = Deno.env.get("PORT") ? Number(Deno.env.get("PORT")) : 8080;
-console.log(`Server listen at http://localhost:${PORT}`);
-await app.listen({ port: PORT });
+export default {
+  port: PORT,
+  fetch: app.fetch,
+};

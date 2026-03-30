@@ -1,18 +1,13 @@
-import { Router } from 'oak';
+import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
 
-const router = new Router();
+export function createStaticRoutes(): Hono {
+  const staticApp = new Hono();
 
-router.get('/(.*)', async (ctx) => {
-	try {
-		await ctx.send({
-			root: `${Deno.cwd()}/public`,
-			index: 'index.html',
-		});
-	} catch {
-		ctx.response.body =
-			(await Deno.open(`${Deno.cwd()}/public/index.html`, { read: true }))
-				.readable;
-	}
-});
+  staticApp.use("*", serveStatic({ root: "./public" }));
+  staticApp.get("*", serveStatic({ path: "./public/index.html" }));
 
-export default router;
+  return staticApp;
+}
+
+export default createStaticRoutes;

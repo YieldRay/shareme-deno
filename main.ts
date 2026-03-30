@@ -34,10 +34,4 @@ app.use(
 app.route("/", createApiRoutes(db));
 app.route("/", createStaticRoutes());
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
-console.log(`Server listening at http://localhost:${PORT}`);
-
-export default {
-  port: PORT,
-  fetch: app.fetch,
-};
+export default app;

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { serveStatic } from "hono/bun";
+import { serveStatic } from "@hono/node-server/serve-static";
 
 export function createStaticRoutes(): Hono {
   const staticApp = new Hono();
